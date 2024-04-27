@@ -13,6 +13,10 @@ if not load_dotenv():
 
 
 class Queryer:
+    """
+    Create a new Queryer that will initialize embeddings and LLM
+    """
+
     def __init__(self) -> None:
         print(end="Initializing... ", flush=True)
         self.embeddings = HuggingFaceEmbeddings()
@@ -23,6 +27,10 @@ class Queryer:
         print("DONE")
 
     def process_file(self, file_path: str) -> None:
+        """
+        Pass the path to a PDF file for the Queryer to process.
+        It may take some time for large PDF's.
+        """
         raw_text = ""
         pdfreader = PdfReader(file_path)
 
@@ -49,10 +57,13 @@ class Queryer:
         )
 
     def ask(self, query: str) -> str:
+        """
+        Pass a question for the Queryer. Returns the LLM's response.
+        """
         if not query or query.isspace():
             return None
 
-        query += "\n\nPlease refrain from repeating yourself."
+        # query += "\n\nPlease refrain from repeating yourself."
         start_time = time.time()
         print(end="Generating response...", flush=True)
         response = self.chain.invoke({"question": query, "chat_history": self.chat_history})
