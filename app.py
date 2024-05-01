@@ -45,7 +45,7 @@ def show_home():
 
 def show_summarizing():
     if "summarizer" not in st.session_state:
-        st.session_state.summarizer = Summarizer("", "")  # TODO: Fix this
+        st.session_state.summarizer = Summarizer()  # TODO: Fix this
     if "file_uploaded" not in st.session_state:
         st.session_state.file_uploaded = False
 
@@ -55,7 +55,10 @@ def show_summarizing():
         "Choose a file for summarizing", type=["pdf"], key="summarizing_uploader"
     )
     if uploaded_file and not st.session_state.file_uploaded:
-        bytes_data = uploaded_file.read()
+        st.write("Processing File...")
+        st.session_state.summarizer.process(uploaded_file.read())
+        st.write("Complete")
+        st.session_state.file_processed = True
         st.session_state.file_uploaded = True
     elif not uploaded_file and st.session_state.file_uploaded:
         st.session_state.file_uploaded = False
@@ -73,8 +76,7 @@ def show_summarizing():
 
     if submit_button:
         st.write("PDF is being summarized...")
-        # TODO: Add sumarization code here
-        summary = "Summary"
+        summary = st.session_state.summarizer.summarize()
         st.write(summary)
 
 

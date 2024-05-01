@@ -50,12 +50,12 @@ class Summarizer:
             is_separator_regex=False,
         )
 
-        generation_config = GenerationConfig.from_pretrained(model.config.name_or_path)
-        generation_config.max_new_tokens = 2048
-        generation_config.temperature = 0.0001
-        generation_config.top_p = 0.95
-        generation_config.do_sample = True
-        generation_config.repetition_penalty = 1.15
+        # generation_config = GenerationConfig.from_pretrained(model.config.name_or_path)
+        # generation_config.max_new_tokens = 2048
+        # generation_config.temperature = 0.0001
+        # generation_config.top_p = 0.95
+        # generation_config.do_sample = True
+        # generation_config.repetition_penalty = 1.15
 
         # text_pipeline = pipeline(
         #     "text-generation",
@@ -100,6 +100,26 @@ class Summarizer:
             return_intermediate_steps=False,
         )
 
+        self.docs = None
+
+    def process(self, fs):
+        self.docs = self.filestream_to_docs(fs)
+    
+    def summarize(self):
+        if self.docs == None:
+            return ""
+        return self.summarize_docs(self.docs)
+
+    def filestream_to_docs(self, fs):
+        pdfreader = PdfReader(BytesIO(fs))
+        raw_text=""
+        for page in pdfreader.pages:
+            content = page.extract_text()
+            if content:
+                raw_text += content
+        docs = self.text_splitter.split_text(raw_text)
+        return docs
+                
     def file_to_docs(self, file):
         """Returns the file split into docs"""
         loader = PyPDFLoader(file)
@@ -137,11 +157,14 @@ class Summarizer:
         res = "\n".join(res)
         return textwrap.fill(res, width=100)
 
-    def summarize(self, file):
+    def summarize_docs(self, docs):
         """Summarize file
 
         :return: summary of the file
         :rtype: str
         """
-        res = self.map_chain.run(self.file_to_docs(file))
+        res = self.map_chain.run(docs)
         return textwrap.fill(res, width=100)
+
+    def summarize_fs(self, fs):
+        return self.summarize_docs(self.filestream_to_docs(fs))
