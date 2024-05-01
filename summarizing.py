@@ -3,6 +3,7 @@ from io import BytesIO
 from rouge_score import rouge_scorer
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.llms.huggingface_endpoint import HuggingFaceEndpoint
 import textwrap
 from langchain.chains import MapReduceDocumentsChain, ReduceDocumentsChain
 from langchain_text_splitters import CharacterTextSplitter
@@ -37,7 +38,8 @@ class Summarizer:
 
     """
 
-    def __init__(self, model, tokenizer):
+    def __init__(self):
+
         self.map_template = map_template
         self.reduce_template = reduce_template
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -63,6 +65,8 @@ class Summarizer:
         )
 
         self.llm = HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0})
+
+
 
         map_prompt = PromptTemplate.from_template(self.map_template)
         self.map_chain = LLMChain(llm=self.llm, prompt=map_prompt)
