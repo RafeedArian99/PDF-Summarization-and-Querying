@@ -4,8 +4,9 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.chains import ConversationalRetrievalChain
 from langchain_community.vectorstores import FAISS
 from dotenv import load_dotenv
-from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader, PdfFileReader
 from tqdm import tqdm
+from io import BytesIO
 import time
 
 if not load_dotenv():
@@ -18,23 +19,26 @@ class Queryer:
     """
 
     def __init__(self) -> None:
-        print(end="Initializing... ", flush=True)
         self.embeddings = HuggingFaceEmbeddings()
-        repo_id = "mistralai/Mistral-7B-Instruct-v0.2"
+        repo_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
         self.llm = HuggingFaceEndpoint(repo_id=repo_id, temperature=0.7)
         self.chain = None
         self.chat_history = []
-        print("DONE")
 
-    def process_file(self, file_path: str) -> None:
+    def process(self, file_stream: bytes) -> None:
         """
         Pass the path to a PDF file for the Queryer to process.
         It may take some time for large PDF's.
         """
-        raw_text = ""
-        pdfreader = PdfReader(file_path)
 
-        for page in tqdm(pdfreader.pages):
+        # Split the file into chunks
+        raw_text = ""
+        # print('>>>', file_stream.__class__)
+        # with open('tmp.pdf', 'wb') as f:
+        #     f.write(file_stream)
+        pdfreader = PdfReader(BytesIO(file_stream))
+
+        for page in tqdm(pdfreader.pages, desc="Extracting PDF"):
             content = page.extract_text()
             if content:
                 raw_text += content
@@ -47,10 +51,12 @@ class Queryer:
         )
         texts = text_splitter.split_text(raw_text)
 
+        # Vectorize the chunks
         print(end="Creating vector store... ", flush=True)
         vector_store = FAISS.from_texts(texts, self.embeddings)
         print("DONE!")
 
+        # Create a retriever and chain it to the LLM
         retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 5})
         self.chain = ConversationalRetrievalChain.from_llm(
             llm=self.llm, chain_type="stuff", retriever=retriever
@@ -71,3 +77,6 @@ class Queryer:
         self.chat_history.append((query, response))
         print(f"DONE ({time.time() - start_time}s)")
         return response
+    
+    def has_file(self) -> bool:
+        return self.chain is not None
