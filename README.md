@@ -6,17 +6,15 @@
 ```bash
 git clone https://github.com/RafeedArian99/PDF-Summarization-and-Querying.git
 ```
-2. Creating and using a virtual env
+2. Installing dependencies
+```bash
+pip3 install -r PDF-Summarization-and-Querying/requirements.txt
+```
+3. Creating and using a virtual env
 ```bash
 virtualenv venv
 source venv/bin/activate
 ```
-
-3. Installing dependencies
-```bash
-pip3 install -r PDF-Summarization-and-Querying/requirements.txt
-```
-
 4. Exporting hugging face token
 ```bash
 # replace $TOKEN with your token

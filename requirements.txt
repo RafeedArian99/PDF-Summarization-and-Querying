@@ -16,3 +16,4 @@ auto-gptq
 bitsandbytes
 sentence-transformers
 faiss-cpu
+virtualenv
