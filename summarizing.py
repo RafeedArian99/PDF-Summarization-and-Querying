@@ -57,14 +57,15 @@ class Summarizer:
         generation_config.do_sample = True
         generation_config.repetition_penalty = 1.15
 
-        text_pipeline = pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            generation_config=generation_config,
-        )
+        # text_pipeline = pipeline(
+        #     "text-generation",
+        #     model=model,
+        #     tokenizer=tokenizer,
+        #     generation_config=generation_config,
+        # )
 
-        self.llm = HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0})
+        repo_id = "mistralai/Mistral-7B-Instruct-v0.2"
+        self.llm = HuggingFaceEndpoint(repo_id=repo_id, temperature=0.7)
 
 
 
