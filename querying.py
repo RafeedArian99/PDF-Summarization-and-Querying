@@ -20,7 +20,7 @@ class Queryer:
 
     def __init__(self) -> None:
         self.embeddings = HuggingFaceEmbeddings()
-        repo_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+        repo_id = "mistralai/Mistral-7B-Instruct-v0.2"
         self.llm = HuggingFaceEndpoint(repo_id=repo_id, temperature=0.7)
         self.chain = None
         self.chat_history = []

@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 from io import StringIO
-from queryer import Queryer
+from querying import Queryer
+from summarizing import Summarizer
 
 PAGE_CONFIG = {
     "page_title": "Summarizing and Querying",
@@ -13,10 +14,6 @@ st.set_page_config(**PAGE_CONFIG)
 
 def main():
     page = st.sidebar.radio("Menu", ["Home", "Summarizing", "Querying"])
-    if "queryer" not in st.session_state:
-        st.session_state.queryer = Queryer()
-    if "file_processed" not in st.session_state:
-        st.session_state.file_processed = False
 
     if page == "Home":
         show_home()
@@ -47,14 +44,21 @@ def show_home():
 
 
 def show_summarizing():
+    if "summarizer" not in st.session_state:
+        st.session_state.summarizer = Summarizer("", "")  # TODO: Fix this
+    if "file_uploaded" not in st.session_state:
+        st.session_state.file_uploaded = False
+
     st.title("Summarizing")
     st.write("Upload your PDF file and get a summary")
     uploaded_file = st.file_uploader(
         "Choose a file for summarizing", type=["pdf"], key="summarizing_uploader"
     )
-    if uploaded_file is not None:
+    if uploaded_file and not st.session_state.file_uploaded:
         bytes_data = uploaded_file.read()
-        # PDF 요약 처리 코드 추가 부분
+        st.session_state.file_uploaded = True
+    elif not uploaded_file and st.session_state.file_uploaded:
+        st.session_state.file_uploaded = False
 
     col1, col2, col3 = st.columns([2.5, 6, 1])
 
@@ -66,12 +70,20 @@ def show_summarizing():
 
     with col3:
         st.write("")
+
     if submit_button:
         st.write("PDF is being summarized...")
-        # PDF 요약 로직 처리
+        # TODO: Add sumarization code here
+        summary = "Summary"
+        st.write(summary)
 
 
 def show_querying():
+    if "queryer" not in st.session_state:
+        st.session_state.queryer = Queryer()
+    if "file_processed" not in st.session_state:
+        st.session_state.file_processed = False
+
     st.title("Querying")
     # st.write("Upload your PDF file and submit queries")
     uploaded_file = st.file_uploader("Choose a file for querying", type=["pdf"])

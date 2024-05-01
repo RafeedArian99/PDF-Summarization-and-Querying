@@ -23,6 +23,7 @@ reduce_template = """The following is set of summaries:
 Take these and distill it into a final, consolidated summary of the main themes.
 Helpful Answer:"""
 
+
 class Summarizer:
     """
     Create a new summarizer
@@ -37,7 +38,6 @@ class Summarizer:
     """
 
     def __init__(self, model, tokenizer):
-
         self.map_template = map_template
         self.reduce_template = reduce_template
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -64,13 +64,9 @@ class Summarizer:
 
         self.llm = HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0})
 
-
-
         map_prompt = PromptTemplate.from_template(self.map_template)
         self.map_chain = LLMChain(llm=self.llm, prompt=map_prompt)
 
-
-        
         reduce_prompt = PromptTemplate.from_template(self.reduce_template)
 
         self.reduce_chain = LLMChain(llm=self.llm, prompt=reduce_prompt)
@@ -99,17 +95,14 @@ class Summarizer:
             return_intermediate_steps=False,
         )
 
-
     def file_to_docs(self, file):
-        """Returns the file split into docs
-        """
+        """Returns the file split into docs"""
         loader = PyPDFLoader(file)
         docs = loader.load_and_split(self.text_splitter)
         return docs
 
     def run_chain(self, docs, chain):
-        """Gets docs from file and runs the chain on docs
-        """
+        """Gets docs from file and runs the chain on docs"""
         res = chain.run(docs)
         return res
 
@@ -123,8 +116,8 @@ class Summarizer:
         return self.run_chain(file, self.reduce_chain)
 
     def get_summary(self, x):
-        x = x[x.find('Summary:') + len('Summary: '):]
-        return x[:x.find('```')]
+        x = x[x.find("Summary:") + len("Summary: ") :]
+        return x[: x.find("```")]
 
     def slow_summarize(self, file):
         """Summarize file (takes 13 mins for article)
@@ -132,7 +125,9 @@ class Summarizer:
         :return: summary of the file
         :rtype: str
         """
-        res = list(map(lambda x: self.run_chain(x.page_content, self.map_chain), self.file_to_docs(file)))
+        res = list(
+            map(lambda x: self.run_chain(x.page_content, self.map_chain), self.file_to_docs(file))
+        )
         res = list(map(lambda x: self.get_summary(x), res))
         res = "\n".join(res)
         return textwrap.fill(res, width=100)
