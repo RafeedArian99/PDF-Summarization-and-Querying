@@ -33,9 +33,6 @@ class Queryer:
 
         # Split the file into chunks
         raw_text = ""
-        # print('>>>', file_stream.__class__)
-        # with open('tmp.pdf', 'wb') as f:
-        #     f.write(file_stream)
         pdfreader = PdfReader(BytesIO(file_stream))
 
         for page in tqdm(pdfreader.pages, desc="Extracting PDF"):
